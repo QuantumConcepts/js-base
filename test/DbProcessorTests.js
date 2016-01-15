@@ -12,7 +12,7 @@ var testDbName = "mocha_test";
 require("../Server.js");
 
 describe("DB Processor", function () {
-    it("Should support CRUD", function (done) {
+    it("should support CRUD", function (done) {
         var originalEntity = {
             firstName: "Jim",
             lastName: "Smythe"
@@ -73,7 +73,7 @@ describe("DB Processor", function () {
         .end(JSON.stringify(originalEntity));
     });
     
-    it("Can GET multiple", function (done) {
+    it("can GET multiple", function (done) {
         var path = "/" + testDbName + "/people";
         var total = 9;
         var current = 0;
@@ -121,7 +121,7 @@ describe("DB Processor", function () {
         postNext();
     });
     
-    it ("Should parse simple search", function () {
+    it ("can parse simple query-string search", function () {
         var expected = {
             firstName: {
                 fieldName: "firstName",
@@ -129,14 +129,77 @@ describe("DB Processor", function () {
                 value: "Jim"
             }
         };
-        var qs = Util.format("%s=%s", expected.firstName.fieldName, expected.firstName.value);
-        var actual = DbProcessor.parseSearch(qs);
+        var actual = DbProcessor.parseSearch({
+            firstName: expected.firstName.value
+        });
         
         Assert.notEqual(actual, null);
         Assert.notEqual(actual.firstName, null);
+        Assert.notEqual(actual.firstName.operator, null);
         Assert.equal(actual.firstName.fieldName, expected.firstName.fieldName);
         Assert.equal(actual.firstName.operator.name, expected.firstName.operator);
         Assert.equal(actual.firstName.value, expected.firstName.value);
+    });
+    
+    it ("can parse simple JSON search", function () {
+        var expected = {
+            firstName: {
+                fieldName: "firstName",
+                operator: "equals",
+                value: "Jim"
+            }
+        };
+        var actual = DbProcessor.parseSearch({
+            search: JSON.stringify(expected)
+        });
+        
+        Assert.notEqual(actual, null);
+        Assert.notEqual(actual.firstName, null);
+        Assert.notEqual(actual.firstName.operator, null);
+        Assert.equal(actual.firstName.fieldName, expected.firstName.fieldName);
+        Assert.equal(actual.firstName.operator.name, expected.firstName.operator);
+        Assert.equal(actual.firstName.value, expected.firstName.value);
+    });
+    
+    it ("can execute simple search", function (done) {
+        this.timeout(0);
+        
+        var path = "/" + testDbName + "/people";
+        
+        Http.request(getHttpOptions(path, "POST"), function (response) {
+            Assert.equal(response.statusCode, HttpStatusCodes.CREATED);
+            
+            var search = {
+                firstName: {
+                    fieldName: "firstName",
+                    operator: "equals",
+                    value: "Jim"
+                }
+            };
+            var qs = Util.format("search=%s", encodeURIComponent(JSON.stringify(search)));
+            var searchPath = Util.format("%s?%s", path, qs);
+            
+            Http.request(getHttpOptions(searchPath, "GET"), function (response) {
+                readEntity(response, function (entities) {
+                    Assert.notEqual(entities, null);
+                    Assert.equal(Array.isArray(entities), true);
+                    Assert.equal(entities.length > 0, true);
+                    
+                    for (var i = 0; i < entities.length; i++) {
+                        var entity = entities[i];
+                        
+                        Assert.equal(entity.firstName, search.firstName.value);
+                    }
+                    
+                    done();
+                });
+            })
+            .end();
+        })
+        .end(JSON.stringify({
+            firstName: "Jim",
+            lastName: "Smythe"
+        }));
     });
     
     after(function (done) {

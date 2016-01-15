@@ -97,10 +97,21 @@ var DbProcessor = function () {
         this.deleteSingle(response, entityName, entityId);
     };
     
-    DbProcessor.prototype.getMany = function (response, entityName, query) {
+    DbProcessor.prototype.getMany = function (response, entityName, search) {
         var relativeFolderPath = Path.join(this.dbPath, entityName);
+        var entityFilter = function (entity) {
+            for (var fieldName in search) {
+                var criteria = search[fieldName];
+                
+                if (!criteria.operator.execute(entity, criteria))
+                    return false;
+            }
+            
+            return true;
+        };
         
         Fs.readdir(relativeFolderPath, function (err, filenames) {
+            var hasResults = false;
             var readFile = function (index) {
                 var filename = filenames[index];
                 var relativeFilePath = Path.join(this.dbPath, entityName, filename);
@@ -111,12 +122,16 @@ var DbProcessor = function () {
                         return;
                     }
                     
-                    response.write(entityData);
+                    if (search == null || entityFilter(JSON.parse(entityData))) {
+                        if (hasResults)
+                            response.write(",");
                     
-                    if (index < (filenames.length - 1)) {
-                        response.write(",");
-                        readFile(++index);
+                        response.write(entityData);
+                        hasResults = true;
                     }
+                    
+                    if (index < (filenames.length - 1))
+                        readFile(++index);
                     else
                         response.end("]");
                 });
@@ -279,8 +294,7 @@ var DbProcessor = function () {
         if (querystring == null)
             return null;
         
-        var dict = Querystring.parse(querystring);
-        var searchParameter = dict[DbProcessor.SearchKeys.search];
+        var searchParameter = querystring[DbProcessor.SearchKeys.search];
         var search = { };
         
         if (searchParameter != null) {
@@ -292,7 +306,8 @@ var DbProcessor = function () {
             }
             
             for (var key in searchParameter) {
-                var criteria = searchParameter[key];
+                var rawCriteria = searchParameter[key];
+                var criteria = DbProcessor.makeCriteria(rawCriteria.fieldName, rawCriteria.operator, rawCriteria.value);
                 
                 try {
                     DbProcessor.validateCriteria(criteria);
@@ -305,10 +320,10 @@ var DbProcessor = function () {
             }
         }
         
-        for (var key in dict) {
+        for (var key in querystring) {
             // Only parse keys which are not "special".
             if (DbProcessor.SearchKeys[key] == null) {
-                var criteria = DbProcessor.parseCriteria(key, dict[key]);
+                var criteria = DbProcessor.parseCriteria(key, querystring[key]);
                 
                 if (criteria != null) {
                     try {
@@ -371,7 +386,7 @@ var DbProcessor = function () {
     DbProcessor.SearchOperators = {
         equals: {
             name: "equals",
-            predicate: (entity, criteria) => {
+            execute: (entity, criteria) => {
                 return (entity[criteria.fieldName] == criteria.value);
             }
         }
