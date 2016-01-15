@@ -10,10 +10,10 @@ var Uuid = require("uuid");
 var DbProcessor = function () {
     var DbProcessor = function (dbPath, dbName) {
         if (dbPath == null)
-            throw "Parameter 'dbPath' is required.";
+            throw Error("Parameter 'dbPath' is required.");
             
         if (dbName == null)
-            throw "Parameter 'dbName' is required.";
+            throw Error("Parameter 'dbName' is required.");
 
         this.dbPath = dbPath;
         this.dbName = dbName;
@@ -31,7 +31,7 @@ var DbProcessor = function () {
             var action = this.actionMap[request.method];
             
             if (action == null)
-                throw Util.format("Unhandled method '%s'.", request.method);
+                throw Error(Util.format("Unhandled method '%s'.", request.method));
         
             try {
                 action(url, request, response);
@@ -234,7 +234,7 @@ var DbProcessor = function () {
         var match = (new RegExp("^/?[^/]+?/([^/?]+)")).exec(url.pathname);
         
         if (match == null)
-            throw "Expected entity name in URL.";
+            throw Error("Expected entity name in URL.");
         
         return match[1];
     };
@@ -288,7 +288,7 @@ var DbProcessor = function () {
                 searchParameter = JSON.parse(searchParameter);
             }
             catch (err) {
-                throw Util.format("Parameter \"&s\" could not be parsed as JSON: %s", DbProcessor.SearchKeys.search, err);
+                throw Error(Util.format("Parameter \"%s\" could not be parsed as JSON: %s", DbProcessor.SearchKeys.search, err));
             }
             
             for (var key in searchParameter) {
@@ -315,7 +315,7 @@ var DbProcessor = function () {
                         DbProcessor.validateCriteria(criteria);
                     }
                     catch (err) {
-                        throw Util.format("Search criteria for \"%s\" could not be validated: %s", key, err);
+                        throw Error(Util.format("Search criteria for \"%s\" could not be validated: %s", key, err));
                     }
                     
                     search[key] = criteria;
@@ -352,13 +352,13 @@ var DbProcessor = function () {
     
     DbProcessor.validateCriteria = function (criteria) {
         if (criteria == null)
-            throw "Search criteria is null.";
+            throw Error("Search criteria is null.");
         
         if (criteria.fieldName == null)
-            throw "Search criteria has null field name.";
+            throw Error("Search criteria has null field name.");
         
         if (criteria.operator == null)
-            throw "Search criteria has null operator.";
+            throw Error("Search criteria has null operator.");
         
         if (criteria.operator.validate != null)
             criteria.operator.validateValue(criteria.value);
