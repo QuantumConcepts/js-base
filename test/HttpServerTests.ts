@@ -1,31 +1,37 @@
-var Assert = require("assert");
-var Util = require("util");
-var Http = require("http");
-var HttpStatusCodes = require("http-status-codes");
-var Path = require("path");
-var DbProcessor = require("../DbProcessor.js");
+import * as Mocha from "mocha";
+import * as Assert from "assert";
+import * as Util from "util";
+import * as Http from "http";
+import * as HttpStatusCodes from "http-status-codes";
+import * as Path from "path";
+import * as rimraf from "rimraf";
+import {HttpServer} from "../HttpServer";
+import {AppInfo} from "../AppInfo";
+import {Config} from "../Config";
+import {DbProcessor} from "../DbProcessor";
+import {TestConfig} from "./TestConfig";
 
-var rmdir = require("rmdir");
+var testConfig = TestConfig.instance;
+var config = new Config(60001, testConfig.relativeDataPath);
+var server = new HttpServer(testConfig.appInfo, config, new DbProcessor(config));
 
-var testDbName = "mocha_test";
+server.run();
 
-require("../Server.js");
-
-describe("DB Processor", function () {
-    it("should support CRUD", function (done) {
-        var originalEntity = {
+describe("HTTP Server", function () {
+    it("should support CRUD", function (done: MochaDone) {
+        var originalEntity = <any>{
             firstName: "Jim",
             lastName: "Smythe"
         };
         
         // POST
-        Http.request(getHttpOptions("/" + testDbName + "/people", "POST"), function (response) {
+        Http.request(getHttpOptions("/" + testConfig.dbName + "/people", "POST"), function (response) {
             var entityLocation = response.headers["location"];
             
             Assert.equal(response.statusCode, HttpStatusCodes.CREATED);
             Assert.notEqual(entityLocation, null);
             
-            readEntity(response, function (entity) {
+            readEntity(response, function (entity: any) {
                 Assert.equal(entity.firstName, originalEntity.firstName);
                 Assert.equal(entity.lastName, originalEntity.lastName);
                 
@@ -36,7 +42,7 @@ describe("DB Processor", function () {
                 Http.request(getHttpOptions(entityLocation, "PUT"), function (response) {
                     Assert.equal(HttpStatusCodes.OK, response.statusCode);
                     
-                    readEntity(response, function (entity) {
+                    readEntity(response, function (entity: any) {
                         Assert.equal(entity.firstName, originalEntity.firstName);
                         Assert.equal(entity.age, originalEntity.age);
                         
@@ -44,7 +50,7 @@ describe("DB Processor", function () {
                         Http.request(getHttpOptions(entityLocation, "GET"), function (response) {
                             Assert.equal(HttpStatusCodes.OK, response.statusCode);
                             
-                            readEntity(response, function (entity) {
+                            readEntity(response, function (entity: any) {
                                 Assert.equal(entity.firstName, originalEntity.firstName);
                                 Assert.equal(entity.lastName, originalEntity.lastName);
                                 Assert.equal(entity.age, originalEntity.age);
@@ -73,8 +79,8 @@ describe("DB Processor", function () {
         .end(JSON.stringify(originalEntity));
     });
     
-    it("can GET multiple", function (done) {
-        var path = "/" + testDbName + "/people";
+    it("can GET multiple", function (done: MochaDone) {
+        var path = "/" + testConfig.dbName + "/people";
         var total = 9;
         var current = 0;
         var postNext = function () {
@@ -97,10 +103,10 @@ describe("DB Processor", function () {
         };
         var getAll = function () {
             Http.request(getHttpOptions(path, "GET"), function (response) {
-                readEntity(response, function (entities) {
+                readEntity(response, function (entities: Array<any>) {
                     Assert.notEqual(entities, null);
                     Assert.equal(Array.isArray(entities), true);
-                    Assert.equal(entities.length, total);
+                    Assert.equal(entities.length >= total, true);
                     
                     for (var i = 0; i < entities.length; i++) {
                         var entity = entities[i];
@@ -121,50 +127,10 @@ describe("DB Processor", function () {
         postNext();
     });
     
-    it ("can parse simple query-string search", function () {
-        var expected = {
-            firstName: {
-                fieldName: "firstName",
-                operator: "equals",
-                value: "Jim"
-            }
-        };
-        var actual = DbProcessor.parseSearch({
-            firstName: expected.firstName.value
-        });
-        
-        Assert.notEqual(actual, null);
-        Assert.notEqual(actual.firstName, null);
-        Assert.notEqual(actual.firstName.operator, null);
-        Assert.equal(actual.firstName.fieldName, expected.firstName.fieldName);
-        Assert.equal(actual.firstName.operator.name, expected.firstName.operator);
-        Assert.equal(actual.firstName.value, expected.firstName.value);
-    });
-    
-    it ("can parse simple JSON search", function () {
-        var expected = {
-            firstName: {
-                fieldName: "firstName",
-                operator: "equals",
-                value: "Jim"
-            }
-        };
-        var actual = DbProcessor.parseSearch({
-            search: JSON.stringify(expected)
-        });
-        
-        Assert.notEqual(actual, null);
-        Assert.notEqual(actual.firstName, null);
-        Assert.notEqual(actual.firstName.operator, null);
-        Assert.equal(actual.firstName.fieldName, expected.firstName.fieldName);
-        Assert.equal(actual.firstName.operator.name, expected.firstName.operator);
-        Assert.equal(actual.firstName.value, expected.firstName.value);
-    });
-    
-    it ("can execute simple search", function (done) {
+    it ("can execute simple search", function (done: MochaDone) {
         this.timeout(0);
         
-        var path = "/" + testDbName + "/people";
+        var path = "/" + testConfig.dbName + "/people";
         
         Http.request(getHttpOptions(path, "POST"), function (response) {
             Assert.equal(response.statusCode, HttpStatusCodes.CREATED);
@@ -180,7 +146,7 @@ describe("DB Processor", function () {
             var searchPath = Util.format("%s?%s", path, qs);
             
             Http.request(getHttpOptions(searchPath, "GET"), function (response) {
-                readEntity(response, function (entities) {
+                readEntity(response, function (entities: Array<any>) {
                     Assert.notEqual(entities, null);
                     Assert.equal(Array.isArray(entities), true);
                     Assert.equal(entities.length > 0, true);
@@ -202,24 +168,27 @@ describe("DB Processor", function () {
         }));
     });
     
-    after(function (done) {
-        rmdir(Path.resolve("data", testDbName), done);
+    after(function (done: MochaDone) {
+        rimraf(Path.resolve(testConfig.dataPath, testConfig.dbName), (err: Error) => {
+            server.stop();
+            done(err);
+        });
     });
 });
 
-function getHttpOptions(path, method) {
+function getHttpOptions(path: string, method: string) {
     return {
         host: process.env.IP,
-        port: process.env.PORT,
+        port: config.port,
         method: method,
         path: path
     };
 }
 
-function readEntity(response, callback) {
+function readEntity(response: Http.IncomingMessage, callback: (entity: any) => any) {
     var rawData = "";
     
-    response.on("data", function (chunk) { rawData += chunk; });
+    response.on("data", function (chunk: Buffer) { rawData += chunk.toString(); });
     response.on("end", function () {
         var entity = JSON.parse(rawData);
         

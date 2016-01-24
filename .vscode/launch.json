@@ -1,0 +1,41 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "Launch",
+			"type": "node",
+			"request": "launch",
+            "preLaunchTask": "build",
+			"program": "./out/Start.js",
+			"runtimeArgs": [
+				"--nolazy"
+			],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"sourceMaps": true
+		},
+		{
+			"name": "Attach",
+			"type": "node",
+			"request": "attach",
+			"port": 5858
+		},
+        {
+            "name": "Test",
+            "type": "node",
+            "request": "launch",
+            //"preLaunchTask": "build",
+            "program": "node_modules/mocha/bin/_mocha",
+            "args": [
+                // "-g",
+                // "GET multiple",
+                "./out/test"
+            ],
+			"env": {
+				"NODE_ENV": "development"
+			},
+			"sourceMaps": false  // TODO Get source maps working.
+        }
+	]
+}

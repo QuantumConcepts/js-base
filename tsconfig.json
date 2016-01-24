@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "target": "es5",
+        "noImplicitAny": true,
+        "module": "commonjs",
+        "declaration": true,
+        "sourceMap": true,
+        "suppressImplicitAnyIndexErrors": true,
+        "experimentalDecorators": true,
+        "outDir": "out/trash/js-base.js"
+    }
+}
