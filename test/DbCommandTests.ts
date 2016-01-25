@@ -1,6 +1,7 @@
 import * as Mocha from "mocha";
 import * as Assert from "assert";
 import * as Util from "util";
+import * as Path from "path";
 import {IncomingMessage} from "http";
 import {DbCommand} from "../DbCommand";
 import {TestConfig} from "./TestConfig";
@@ -44,21 +45,21 @@ describe("DB Command", function () {
     
     it("builds correct DB root path", () => {
         var cmd = getCommand();
-        var expected = Util.format("%s\\%s", testConfig.dataPath, testConfig.dbName);
+        var expected = Path.join(testConfig.dataPath, testConfig.dbName);
         
         Assert.equal(cmd.getDbRootPath(), expected);
     });
     
     it("builds correct entity root path", () => {
         var cmd = getCommand();
-        var expected = Util.format("%s\\%s\\people", testConfig.dataPath, testConfig.dbName);
+        var expected = Path.join(testConfig.dataPath, testConfig.dbName, "people");
         
         Assert.equal(cmd.getEntityRootPath(), expected);
     });
     
     it("builds correct entity path", () => {
         var cmd = getCommand();
-        var expected = Util.format("%s\\%s\\people\\123.json", testConfig.dataPath, testConfig.dbName);
+        var expected = Path.join(testConfig.dataPath, testConfig.dbName, "people", "123.json");
         
         Assert.equal(cmd.getEntityPath(), expected);
     });
