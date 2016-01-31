@@ -24,8 +24,13 @@ export class SearchCriteria {
         this.operator.validateValue(this.value);
     };
     
-    public matches(entity: Object): boolean {
-        return this.operator.exec(entity, this.fieldName, this.value);
+    public test(entity: Object): boolean {
+        var result = this.operator.exec(entity, this.fieldName, this.value);
+        
+        if (this.invert)
+            result = !result;
+        
+        return result;
     }
 
     public static parse(key: string, value: any) {

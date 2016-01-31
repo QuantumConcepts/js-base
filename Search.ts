@@ -6,6 +6,21 @@ import {ArgumentNullError} from "./ArgumentNullError";
 
 export class Search {
     public criteria = new Array<SearchCriteria>();
+    
+    public test(entity: Object): boolean {
+        var isMatch = true;
+        
+        for (var i = 0; i < this.criteria.length; i++) {
+            var criteria = this.criteria[i];
+            
+            if (!criteria.test(entity)) {
+                isMatch = false;
+                break;
+            }
+        }
+        
+        return isMatch;
+    }
 
     public static parseString(querystring: string): Search {
         if (!querystring) return null;

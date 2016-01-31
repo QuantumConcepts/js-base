@@ -31,21 +31,7 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public getMany(dbCommand: DbCommand, search: Search, callback: (data: Array<string>, errors: Array<PersistenceError>, err?: string) => any): void {
-        var entityFilter = (entity: Object) => {
-            var isMatch = true;
-            
-            for (var i = 0; i < search.criteria.length; i++) {
-                var criteria = search.criteria[i];
-                
-                if (!criteria.matches(entity)) {
-                    isMatch = false;
-                    break;
-                }
-            }
-            
-            return isMatch;
-        };
+    public getMany(dbCommand: DbCommand, search: Search, callback: (data: Array<string>, errors?: Array<PersistenceError>, err?: string) => any): void {
         var errors = new Array<PersistenceError>();
 
         FS.readdir(dbCommand.getEntityRootPath(), (err: any, filenames: Array<string>) => {
@@ -63,7 +49,7 @@ export class DbProcessor implements IDbProcessor {
 
                         var entityData = buffer.toString();
 
-                        if (search == null || entityFilter(JSON.parse(entityData)))
+                        if (search == null || search.test(JSON.parse(entityData)))
                             results.push(entityData);
 
                         if (index < (filenames.length - 1))
