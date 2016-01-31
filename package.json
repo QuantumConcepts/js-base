@@ -6,9 +6,12 @@
   "repository": {
     "url": "https://github.com/QuantumConcepts/js-base"
   },
-  "author": "Quantum Concepts <josh@quantumconcept.io> (http://github.com/QuantumConcepts)",
+  "author": {
+    "email": "josh@quantumconcept.io",
+    "name": "Josh McCullough",
+    "url": "http://github.com/QuantumConcepts"
+  },
   "dependencies": {
-    "async": "~0.2.8",
     "http-status-codes": "^1.0.5",
     "mkdirp": "^0.5.1",
     "node-uuid": "^1.4.7",
@@ -27,8 +30,5 @@
   "scripts": {
     "test": "gulp build && mocha ./dist/test/",
     "start": "node ./dist/Start.js"
-  },
-  "files": [
-      "./dist/*"
-  ]
+  }
 }
