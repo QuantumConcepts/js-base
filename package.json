@@ -1,13 +1,13 @@
 {
   "name": "js-base",
-  "version": "0.0.0",
+  "version": "0.0.1-beta",
   "description": "A No-SQL RESTful database engine.",
   "license": "AGPL-1.0",
   "main": "Start.js",
   "repository": {
     "url": "https://github.com/QuantumConcepts/js-base"
   },
-  "author": "Quantum Concepts",
+  "author": "Quantum Concepts <josh@quantumconcept.io> (http://github.com/QuantumConcepts)",
   "dependencies": {
     "async": "~0.2.8",
     "http-status-codes": "^1.0.5",
@@ -26,6 +26,9 @@
     "typescript": "^1.7.5"
   },
   "scripts": {
-    "test": "gulp build; mocha ./out/test/"
-  }
+    "test": "gulp build && mocha ./out/test/"
+  },
+  "files": [
+      "./out/*"
+  ]
 }
