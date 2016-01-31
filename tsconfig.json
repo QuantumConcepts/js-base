@@ -7,6 +7,6 @@
         "sourceMap": true,
         "suppressImplicitAnyIndexErrors": true,
         "experimentalDecorators": true,
-        "outDir": "out/trash/js-base.js"
+        "outDir": "./dist/trash/js-base.js"
     }
 }

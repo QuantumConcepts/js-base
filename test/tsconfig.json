@@ -5,11 +5,10 @@
         "module": "commonjs",
         "suppressImplicitAnyIndexErrors": true,
         "experimentalDecorators": true,
-        "outDir": "out/trash/js-base-test.js"
+        "outDir": "./dist/trash/js-base-test.js"
     },
     "files": [
         "../typings/tsd.d.ts",
-        "./DbProcessorTests.ts",
-        "./ServerTests.ts"
+        "./*"
     ]
 }

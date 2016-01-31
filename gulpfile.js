@@ -25,10 +25,10 @@ var testTsOptions = {
 var tsTypingsFile = "./typings/tsd.d.ts";
 
 gulp.task("clean", (done) => {
-    rimraf("./out", (err) => {
+    rimraf("./dist", (err) => {
         if (err) return done(err);
         
-        mkdirp("./out", done);
+        mkdirp("./dist", done);
     });
 });
 
@@ -50,7 +50,7 @@ gulp.task("build", ["tsc", "tsc-test"]);
 
 gulp.task("test", ["build"], () => {
     return gulp
-        .src("./out/test/*.js", { read: false })
+        .src("./dist/test/*.js", { read: false })
         .pipe(mocha({ reporter: "spec" }));
 });
 
@@ -63,8 +63,8 @@ function compileTypeScript(options, fileGlobs, outDir, done) {
     outDir = (outDir || "");
     
     return merge([
-        pipeline.js.pipe(gulp.dest("./out/" + outDir)),
-        pipeline.dts.pipe(gulp.dest("./out/" + outDir)),
+        pipeline.js.pipe(gulp.dest("./dist/" + outDir)),
+        pipeline.dts.pipe(gulp.dest("./dist/" + outDir)),
         pipeline.pipe(sourcemaps.write({
             includeContent: false,
             sourceRoot: "../"

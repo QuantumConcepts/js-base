@@ -26,9 +26,10 @@
     "typescript": "^1.7.5"
   },
   "scripts": {
-    "test": "gulp build && mocha ./out/test/"
+    "test": "gulp build && mocha ./dist/test/",
+    "start": "node ./dist/Start.js"
   },
   "files": [
-      "./out/*"
+      "./dist/*"
   ]
 }
