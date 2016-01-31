@@ -3,7 +3,6 @@
   "version": "0.0.1-beta",
   "description": "A No-SQL RESTful database engine.",
   "license": "AGPL-1.0",
-  "main": "Start.js",
   "repository": {
     "url": "https://github.com/QuantumConcepts/js-base"
   },
