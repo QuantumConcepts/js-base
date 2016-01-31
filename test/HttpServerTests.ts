@@ -190,8 +190,15 @@ function readEntity(response: Http.IncomingMessage, callback: (entity: any) => a
     
     response.on("data", function (chunk: Buffer) { rawData += chunk.toString(); });
     response.on("end", function () {
-        var entity = JSON.parse(rawData);
+        var parsedEntity: Object = null;
         
-        callback(entity);
+        try {
+            parsedEntity = JSON.parse(rawData);
+        }
+        catch (err) {
+            throw Error(Util.format("Could not parse JSON returned from URL \"%s\": %s", response.url, rawData));
+        }
+        
+        callback(parsedEntity);
     });
 }
