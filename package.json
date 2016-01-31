@@ -26,6 +26,6 @@
     "typescript": "^1.7.5"
   },
   "scripts": {
-    "test": "gulp test"
+    "test": "gulp build; mocha ./out/test/"
   }
 }
