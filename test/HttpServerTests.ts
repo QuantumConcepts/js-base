@@ -13,7 +13,7 @@ import {TestConfig} from "./TestConfig";
 
 var testConfig = TestConfig.instance;
 var config = new Config(60001, testConfig.relativeDataPath);
-var server = new HttpServer(testConfig.appInfo, config, new DbProcessor(config));
+var server = new HttpServer(config, new DbProcessor(config));
 
 server.run();
 

@@ -7,9 +7,8 @@ import {AppInfo} from "../AppInfo";
 import {Config} from "../Config";
 import {DbProcessor} from "../DbProcessor";
 
-var appInfo = new AppInfo("js-base", "0.0.0");
 var config = new Config(60000, "../data/");
-var server = new HttpServer(appInfo, config, new DbProcessor(config));
+var server = new HttpServer(config, new DbProcessor(config));
 
 server.run();
 

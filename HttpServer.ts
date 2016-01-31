@@ -21,17 +21,15 @@ export class HttpServer implements IServer {
         "PUT": this.processPutAction.bind(this),
         "DELETE": this.processDeleteAction.bind(this)
     };
-    private appInfo: AppInfo;
+    private appInfo: AppInfo = new AppInfo("js-base", "0.0.1-beta");
     private config: Config;
     private server: Http.Server;
     private dbProcessor: IDbProcessor;
 
-    constructor(appInfo: AppInfo, config: Config, dbProcessor: IDbProcessor) {
-        if (!appInfo) throw new ArgumentNullError("appInfo");
+    constructor(config: Config, dbProcessor: IDbProcessor) {
         if (!config) throw new ArgumentNullError("config");
         if (!dbProcessor) throw new ArgumentNullError("dbProcessor");
         
-        this.appInfo = appInfo;
         this.config = config;
         this.dbProcessor = dbProcessor;
         this.server = Http.createServer(this.handleRequest.bind(this));
