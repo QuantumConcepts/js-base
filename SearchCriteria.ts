@@ -1,17 +1,20 @@
 import {SearchOperator} from "./SearchOperator";
+import {SearchOperatorRegistry} from "./SearchOperatorRegistry";
 
 export class SearchCriteria {
     public fieldName: string;
     public operator: SearchOperator;
     public value: any;
+    public invert = false;
 
-    constructor(fieldName: string, operatorName: string, rawValue: any) {
-        var operator = (SearchOperator.get(operatorName) || SearchOperator.default);
-        var value = operator.parseValue(rawValue);
+    constructor(fieldName: string, operator: SearchOperator|string, rawValue?: any, invert: boolean = false) {
+        var resolvedOperator = SearchOperatorRegistry.resolve(operator);
+        var value = resolvedOperator.parseValue(rawValue);
 
         this.fieldName = fieldName;
-        this.operator = operator;
+        this.operator = resolvedOperator;
         this.value = value;
+        this.invert = invert;
     }
 
     public validate(): void {

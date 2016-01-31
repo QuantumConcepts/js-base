@@ -2,22 +2,18 @@ import {ISearchOperatorExecutor} from "./ISearchOperatorExecutor";
 import {ArgumentNullError} from "./ArgumentNullError";
 
 export class SearchOperator {
-    private static registry = { };
+    private static Registry = { };
 
-    public static default: SearchOperator;
-
-    public name: string;
+    public aliases: Array<string>;
     public exec: ISearchOperatorExecutor;
     public parseValue: (value: any) => any;
     public validateValue: (value: any) => void;
 
-    constructor(name: string, exec: ISearchOperatorExecutor);
-    constructor(name: string, exec: ISearchOperatorExecutor, parseValue: (value: any) => any)
-    constructor(name: string, exec: ISearchOperatorExecutor, parseValue: (value: any) => any = null, validateValue: (value: any) => void = null) {
-        ArgumentNullError.check(name, "name");
+    constructor(aliases: string|Array<string>, exec: ISearchOperatorExecutor, parseValue: (value: any) => any = null, validateValue: (value: any) => void = null) {
+        ArgumentNullError.check(aliases, "aliases");
         ArgumentNullError.check(exec, "exec");
         
-        this.name = name;
+        this.aliases = (Array.isArray(aliases) ? aliases : [aliases]);
         this.exec = this.wrapExec(exec);
 
         if (parseValue != null)
@@ -39,18 +35,8 @@ export class SearchOperator {
             return true;
         };
     }
-
-    public static add(operator: SearchOperator): void {
-        SearchOperator.registry[operator.name] = operator;
-    }
-
-    public static get(name: string): SearchOperator {
-        return SearchOperator.registry[name];
+    
+    public getName(): string {
+        return this.aliases[0];
     }
 }
-
-SearchOperator.default = new SearchOperator("equals",
-    (entity: Object, fieldName: string, value: any): boolean => {
-        return (entity[fieldName] == value);
-    });
-SearchOperator.add(SearchOperator.default);
