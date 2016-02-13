@@ -6,7 +6,8 @@
 			"type": "node",
 			"request": "launch",
             "preLaunchTask": "build",
-			"program": "./out/Start.js",
+            "cwd": "${workspaceRoot}",
+			"program": "${workspaceRoot}/dist/Start.js",
 			"runtimeArgs": [
 				"--nolazy"
 			],
@@ -25,17 +26,16 @@
             "name": "Test",
             "type": "node",
             "request": "launch",
-            //"preLaunchTask": "build",
-            "program": "node_modules/mocha/bin/_mocha",
+            // "preLaunchTask": "build",
+            "cwd": "${workspaceRoot}",
+            "program": "${workspaceRoot}/node_modules/mocha/bin/_mocha",
             "args": [
-                // "-g",
-                // "GET multiple",
-                "./out/test"
+                "./dist/test"
             ],
 			"env": {
 				"NODE_ENV": "development"
 			},
-			"sourceMaps": false  // TODO Get source maps working.
+			"sourceMaps": true  // TODO Get source maps working.
         }
 	]
 }
