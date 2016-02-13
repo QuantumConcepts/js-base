@@ -56,6 +56,10 @@ export class HttpServer implements IServer {
 
     private processDbRequest(request: Http.IncomingMessage, response: Http.ServerResponse) {
         var dbCommand = DbCommand.parseRequest(this.config.dataPath, request);
+        
+        if (dbCommand == null)
+            return this.badRequest(response, Util.format("Could not extract intended command from the url \"%s\".", request.url));
+        
         var dbPath = dbCommand.getDbRootPath();
         var dbReady = () => {
             var action = this.actionMap[request.method];
