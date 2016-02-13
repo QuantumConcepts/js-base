@@ -79,7 +79,9 @@ export class HttpServer implements IServer {
         if (!dbCommand.hasEntityId()) {
             var search = Search.parseString(dbCommand.query);
 
-            this.dbProcessor.getMany(dbCommand, search, (data: Array<string>) => {
+            this.dbProcessor.getMany(dbCommand, search, (data, dataErrors, err) => {
+                if (this.handleErr(response, err)) return;
+                
                 response.statusCode = HttpStatusCodes.OK;
                 response.write("[");
 
@@ -94,7 +96,9 @@ export class HttpServer implements IServer {
             });
         }
         else {
-            this.dbProcessor.getSingle(dbCommand, (data: string) => {
+            this.dbProcessor.getSingle(dbCommand, (data, err) => {
+                if (this.handleErr(response, err)) return;
+                
                 if (data) {
                     response.statusCode = HttpStatusCodes.OK;
                     response.end(data);
@@ -108,22 +112,28 @@ export class HttpServer implements IServer {
     }
 
     private processPostAction(dbCommand: DbCommand, request: Http.IncomingMessage, response: Http.ServerResponse) {
-        this.readAndParseRequestBody(request, (entity: any) => {
+        this.readAndParseRequestBody(request, (entity, err) => {
+            if (this.handleErr(response, err)) return;
+            
             if (entity == null) {
                 this.badRequest(response, "Could not parse payload as JSON.");
                 return;
             }
 
-            this.dbProcessor.saveSingle(dbCommand, entity, (data: string) => {
+            this.dbProcessor.saveSingle(dbCommand, entity, (data, err) => {
+                if (this.handleErr(response, err)) return;
+                
                 response.statusCode = HttpStatusCodes.CREATED;
                 response.setHeader("Location", Util.format("/%s/%s/%s", dbCommand.dbName, dbCommand.entityName, entity.id));
                 response.end(data);
             });
-        }, (err: any) => this.badRequest(response, err));
+        });
     }
 
     private processPutAction(dbCommand: DbCommand, request: Http.IncomingMessage, response: Http.ServerResponse) {
-        this.readAndParseRequestBody(request, (entity: any) => {
+        this.readAndParseRequestBody(request, (entity, err) => {
+            if (this.handleErr(response, err)) return;
+            
             if (entity == null) {
                 this.badRequest(response, "Could not parse payload as JSON.");
                 return;
@@ -135,15 +145,19 @@ export class HttpServer implements IServer {
                 return;
             }
 
-            this.dbProcessor.saveSingle(dbCommand, entity, (data: string) => {
+            this.dbProcessor.saveSingle(dbCommand, entity, (data, err) => {
+                if (this.handleErr(response, err)) return;
+                
                 response.statusCode = HttpStatusCodes.OK;
                 response.end(data);
             });
-        }, (err: any) => this.badRequest(response, err));
+        });
     }
 
     private processDeleteAction(dbCommand: DbCommand, request: Http.IncomingMessage, response: Http.ServerResponse) {
-        this.dbProcessor.deleteSingle(dbCommand, () => {
+        this.dbProcessor.deleteSingle(dbCommand, (err) => {
+            if (this.handleErr(response, err)) return;
+            
             response.statusCode = HttpStatusCodes.OK;
             response.end();
         });
@@ -160,7 +174,7 @@ export class HttpServer implements IServer {
         });
     }
 
-    private readAndParseRequestBody(request: Http.IncomingMessage, callback: (data: any) => any, errorCallback: IErrorCallback) {
+    private readAndParseRequestBody(request: Http.IncomingMessage, callback: (data: any, err?: any) => any) {
         this.readRequestBody(request, (rawData: string) => {
             var data: any = null;
             
@@ -168,12 +182,17 @@ export class HttpServer implements IServer {
                 data = JSON.parse(rawData);
             }
             catch (err) {
-                errorCallback(Util.format("Unable to parse request body as JSON. %s", err));
+                callback(null, Util.format("Unable to parse request body as JSON. %s", err));
                 return;
             }
 
             callback(data);
         });
+    }
+
+    private handleErr(response: Http.ServerResponse, err: any) {
+        if (err)
+            this.badRequest(response, err);
     }
 
     private badRequest(response: Http.ServerResponse, err: any) {

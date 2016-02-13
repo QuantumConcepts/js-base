@@ -31,45 +31,49 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public getMany(dbCommand: DbCommand, search: Search, callback: (data: Array<string>, errors?: Array<PersistenceError>, err?: string) => any): void {
+    public getMany(dbCommand: DbCommand, search: Search, callback: (data: Array<string>, dataErrors: Array<PersistenceError>, err?: any) => any): void {
         var errors = new Array<PersistenceError>();
+        
+        FS.exists(dbCommand.getEntityRootPath(), (exists: boolean) => {
+            if (!exists) return callback(null, errors);
 
-        FS.readdir(dbCommand.getEntityRootPath(), (err: any, filenames: Array<string>) => {
-            if (err) return callback(null, errors, err);
+            FS.readdir(dbCommand.getEntityRootPath(), (err: any, filenames: Array<string>) => {
+                if (err) return callback(null, errors, err);
 
-            var results = new Array<string>();
-            var readFile = (index: number = 0) => {
-                var filename = filenames[index];
+                var results = new Array<string>();
+                var readFile = (index: number = 0) => {
+                    var filename = filenames[index];
 
-                try {
-                    var relativeFilePath = Path.join(dbCommand.getEntityRootPath(), filename);
+                    try {
+                        var relativeFilePath = Path.join(dbCommand.getEntityRootPath(), filename);
 
-                    FS.readFile(relativeFilePath, (err: any, buffer: Buffer) => {
-                        if (err) throw Error(err);
+                        FS.readFile(relativeFilePath, (err: any, buffer: Buffer) => {
+                            if (err) throw Error(err);
 
-                        var entityData = buffer.toString();
+                            var entityData = buffer.toString();
 
-                        if (search == null || search.test(JSON.parse(entityData)))
-                            results.push(entityData);
+                            if (search == null || search.test(JSON.parse(entityData)))
+                                results.push(entityData);
 
-                        if (index < (filenames.length - 1))
-                            readFile(++index);
-                        else
-                            callback(results, errors);
-                    });
-                }
-                catch (err) {
-                    var id = (new RegExp("(.+)\.[^\.]+$").exec(filename))[1];
+                            if (index < (filenames.length - 1))
+                                readFile(++index);
+                            else
+                                callback(results, errors);
+                        });
+                    }
+                    catch (err) {
+                        var id = (new RegExp("(.+)\.[^\.]+$").exec(filename))[1];
 
-                    errors.push(new PersistenceError(id, err.toString()));
-                }
-            };
+                        errors.push(new PersistenceError(id, err.toString()));
+                    }
+                };
 
-            readFile();
+                readFile();
+            });
         });
     }
 
-    public saveSingle(dbCommand: DbCommand, entity: any, callback: (data: string, err?: string) => any): void {
+    public saveSingle(dbCommand: DbCommand, entity: any, callback: (data: string, err?: any) => any): void {
         dbCommand.entityId = (dbCommand.entityId || entity.id || Uuid.v1());
         entity.id = dbCommand.entityId;
         
@@ -129,7 +133,7 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public deleteMany(dbCommand: DbCommand, ids: Array<string>, callback: (ids: Array<string>, errors: Array<PersistenceError>) => any): void {
+    public deleteMany(dbCommand: DbCommand, ids: Array<string>, callback: (deletedIds: Array<string>, errors: Array<PersistenceError>) => any): void {
         var count = ids.length;
         var deletedIds = new Array<any>();
         var errors = new Array<PersistenceError>();
