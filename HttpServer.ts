@@ -10,7 +10,6 @@ import {Config} from "./Config";
 import {IDbProcessor} from "./IDbProcessor";
 import {DbCommand} from "./DbCommand";
 import {Search} from "./Search";
-import {IErrorCallback} from "./IErrorCallback";
 import {ArgumentNullError} from "./ArgumentNullError";
 
 export class HttpServer implements IServer {
