@@ -1,4 +1,3 @@
-import {AppInfo} from "./AppInfo";
 import {Config} from "./Config";
 import {DbProcessor} from "./DbProcessor";
 import {HttpServer} from "./HttpServer";

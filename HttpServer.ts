@@ -6,7 +6,6 @@ import * as FS   from "fs";
 import * as HttpStatusCodes from "http-status-codes";
 
 import {IServer} from "./IServer";
-import {AppInfo} from "./AppInfo";
 import {Config} from "./Config";
 import {IDbProcessor} from "./IDbProcessor";
 import {DbCommand} from "./DbCommand";
@@ -21,7 +20,6 @@ export class HttpServer implements IServer {
         "PUT": this.processPutAction.bind(this),
         "DELETE": this.processDeleteAction.bind(this)
     };
-    private appInfo: AppInfo = new AppInfo("js-base", "0.0.1-beta");
     private config: Config;
     private server: Http.Server;
     private dbProcessor: IDbProcessor;
@@ -35,25 +33,21 @@ export class HttpServer implements IServer {
         this.server = Http.createServer(this.handleRequest.bind(this));
     }
 
-    public run(): void {
+    public run(callback?: () => any): void {
         this.server.listen(this.config.port, () => {
             console.log("Server listening on port %s.", this.config.port);
+            
+            if (callback)
+                callback();
         });
     }
     
-    public stop(): void {
-        this.server.close();
+    public stop(callback?: () => any): void {
+        this.server.close(callback);
     }
 
     private handleRequest(request: Http.IncomingMessage, response: Http.ServerResponse) {
-        if ("/" == request.url) {
-            response.statusCode = HttpStatusCodes.OK;
-            response.write(Util.format("%s v%s", this.appInfo.name, this.appInfo.version));
-            response.end();
-            return;
-        }
-        else
-            this.processDbRequest(request, response);
+        this.processDbRequest(request, response);
     }
 
     private processDbRequest(request: Http.IncomingMessage, response: Http.ServerResponse) {

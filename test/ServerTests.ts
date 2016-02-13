@@ -3,7 +3,6 @@ import * as Assert from "assert";
 import * as Util from "util";
 import * as Http from "http";
 import {HttpServer} from "../HttpServer";
-import {AppInfo} from "../AppInfo";
 import {Config} from "../Config";
 import {DbProcessor} from "../DbProcessor";
 

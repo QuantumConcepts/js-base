@@ -6,7 +6,6 @@ import * as HttpStatusCodes from "http-status-codes";
 import * as Path from "path";
 import * as rimraf from "rimraf";
 import {HttpServer} from "../HttpServer";
-import {AppInfo} from "../AppInfo";
 import {Config} from "../Config";
 import {DbProcessor} from "../DbProcessor";
 import {TestConfig} from "./TestConfig";
