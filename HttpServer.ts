@@ -90,17 +90,23 @@ export class HttpServer implements IServer {
             this.dbProcessor.getMany(dbCommand, search, (data, dataErrors, err) => {
                 if (this.handleErr(response, err)) return;
                 
-                response.statusCode = HttpStatusCodes.OK;
-                response.write("[");
+                if (data == null || data.length == 0) {
+                    response.statusCode = HttpStatusCodes.NO_CONTENT;
+                    response.end();
+                }
+                else {
+                    response.statusCode = HttpStatusCodes.OK;
+                    response.write("[");
 
-                data.forEach((item, index) => {
-                    response.write(item);
+                    data.forEach((item, index) => {
+                        response.write(item);
 
-                    if (index < (data.length - 1))
-                        response.write(",");
-                });
+                        if (index < (data.length - 1))
+                            response.write(",");
+                    });
 
-                response.end("]");
+                    response.end("]");
+                }
             });
         }
         else {
