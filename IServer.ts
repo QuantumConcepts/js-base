@@ -1,4 +1,4 @@
 export interface IServer {
-    run(): void;
-    stop(): void;
+    run(callback?: () => any): void;
+    stop(callback?: () => any): void;
 }
