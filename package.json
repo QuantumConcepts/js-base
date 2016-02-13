@@ -1,11 +1,11 @@
 {
-  "name": "js-base",
+  "name": "slumber-db",
   "version": "0.0.0-beta",
-  "description": "A No-SQL RESTful database engine.",
+  "description": "A No-SQL RESTful database engine written in JavaScript.",
   "license": "AGPL-1.0",
   "main": "index.js",
   "repository": {
-    "url": "https://github.com/QuantumConcepts/js-base"
+    "url": "https://github.com/QuantumConcepts/slumber-db"
   },
   "author": {
     "email": "josh@quantumconcept.io",
