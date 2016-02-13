@@ -19,7 +19,7 @@ describe("Server", function () {
             method: "GET",
             path: "/"
         }, function (response) {
-            Assert.equal(200, response.statusCode);
+            Assert.equal(204, response.statusCode);
             done();
         }).end();
     });

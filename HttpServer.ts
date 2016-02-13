@@ -46,7 +46,12 @@ export class HttpServer implements IServer {
     }
 
     private handleRequest(request: Http.IncomingMessage, response: Http.ServerResponse) {
-        this.processDbRequest(request, response);
+        if (request.url === "/") {
+            response.statusCode = HttpStatusCodes.NO_CONTENT;
+            response.end();
+        }
+        else
+            this.processDbRequest(request, response);
     }
 
     private processDbRequest(request: Http.IncomingMessage, response: Http.ServerResponse) {
