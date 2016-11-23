@@ -4,7 +4,7 @@ import * as FS              from "fs";
 import * as Path            from "path";
 import * as mkdirp          from "mkdirp";
 import * as QueryString     from "querystring";
-import * as Uuid            from "node-uuid";
+import * as Uuid            from "uuid";
 
 import {IDbProcessor}       from "./IDbProcessor";
 import {DbCommand}       from "./DbCommand";
