@@ -33,7 +33,9 @@ A slumberDb server is now running on the default port (8080). Now you may...
 > http://localhost:8080/{database_name}/{entity_name}/{entity_id}
 
 ##Security
+
 There isn't any, yet. If you `POST` to a new `database_name` or `entity_name`, that database and/or entity path will be created for you.
 
 ##Samples
+
 ...are located here: https://github.com/QuantumConcepts/slumber-db-samples
