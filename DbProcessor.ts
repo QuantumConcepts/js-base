@@ -5,9 +5,10 @@ import * as Path            from "path";
 import * as mkdirp          from "mkdirp";
 import * as QueryString     from "querystring";
 import * as Uuid            from "uuid";
-
 import {IDbProcessor}       from "./IDbProcessor";
-import {DbCommand}       from "./DbCommand";
+import {ISingleResult}      from "./ISingleResult";
+import {IMultiResult}       from "./IMultiResult";
+import {DbCommand}          from "./DbCommand";
 import {Config}             from "./Config";
 import {Search}             from "./Search";
 import {PersistenceError}   from "./PersistenceError";
@@ -19,7 +20,7 @@ export class DbProcessor implements IDbProcessor {
         this.config = config;
     }
 
-    public getSingle(dbCommand: DbCommand, callback: (data: string, err?: string) => any): void {
+    public getSingle(dbCommand: DbCommand): Promise<ISingleResult> {
         FS.exists(dbCommand.getEntityPath(), (exists: boolean) => {
             if (!exists) return callback(null);
 
@@ -31,7 +32,7 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public getMany(dbCommand: DbCommand, search: Search, callback: (data: Array<string>, dataErrors: Array<PersistenceError>, err?: any) => any): void {
+    public getMany(dbCommand: DbCommand, search: Search): Promise<IMultiResult> {
         var errors = new Array<PersistenceError>();
         
         FS.exists(dbCommand.getEntityRootPath(), (exists: boolean) => {
@@ -73,7 +74,7 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public saveSingle(dbCommand: DbCommand, entity: any, callback: (data: string, err?: any) => any): void {
+    public saveSingle(dbCommand: DbCommand, entity: any): Promise<ISingleResult> {
         dbCommand.entityId = (dbCommand.entityId || entity.id || Uuid.v1());
         entity.id = dbCommand.entityId;
         
@@ -91,7 +92,7 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public saveMany(dbCommand: DbCommand, entities: Array<any>, callback: (data: Array<string>, errors: Array<PersistenceError>) => any): void {
+    public saveMany(dbCommand: DbCommand, entities: Array<any>): Promise<IMultiResult> {
         var count = entities.length;
         var createdEntities = new Array<any>();
         var errors = new Array<PersistenceError>();
@@ -119,7 +120,7 @@ export class DbProcessor implements IDbProcessor {
         save();
     }
 
-    public deleteSingle(dbCommand: DbCommand, callback: (err?: string) => any): void {
+    public deleteSingle(dbCommand: DbCommand): Promise<ISingleResult> {
         var entityPath = dbCommand.getEntityPath();
         
         FS.exists(entityPath, (exists: boolean) => {
@@ -133,7 +134,7 @@ export class DbProcessor implements IDbProcessor {
         });
     }
 
-    public deleteMany(dbCommand: DbCommand, ids: Array<string>, callback: (deletedIds: Array<string>, errors: Array<PersistenceError>) => any): void {
+    public deleteMany(dbCommand: DbCommand, ids: Array<string>): Promise<IMultiResult> {
         var count = ids.length;
         var deletedIds = new Array<any>();
         var errors = new Array<PersistenceError>();
